@@ -1,0 +1,10 @@
+# IDE folders
+/.idea/
+
+# Cypress test related files
+/cypress/screenshots/
+/cypress/videos/
+
+# NPM related files
+/package-lock.json
+/node_modules/
