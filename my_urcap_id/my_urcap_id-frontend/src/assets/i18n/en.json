@@ -1,0 +1,17 @@
+{
+  "program": {
+    "tree": {
+      "nodes": {
+        "my-company-id-my-urcap-id-my-urcap-id-prg": "My Urcap Id Prg"
+      }
+    }
+  },
+  "application": {
+    "nodes": {
+      "my-company-id-my-urcap-id-my-urcap-id-app": {
+        "title": "My Urcap Id App",
+        "supportiveText": "My Urcap Id App - Supportive Text"
+      }
+    }
+  }
+}

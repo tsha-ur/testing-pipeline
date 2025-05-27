@@ -1,0 +1,16 @@
+{
+  "name": "my_urcap_id",
+  "version": "0.0.0",
+  "scripts": {
+    "lint": "node -e \"console.log('Linting not supported in docker')\"",
+    "prebuild": "rimraf dist",
+    "build": "npm run build-docker-image && npm run save-docker-image",
+    "build-docker-image": "docker build --platform ${ARCH:-linux/amd64} -t my_urcap_id-backend:latest .",
+    "save-docker-image": "mkdir dist && docker save -o dist/my_urcap_id-backend.tar my_urcap_id-backend:latest"
+  },
+  "private": true,
+  "dependencies": {},
+  "devDependencies": {
+    "rimraf": "5.0.7"
+  }
+}

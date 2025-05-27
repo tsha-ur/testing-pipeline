@@ -1,0 +1,21 @@
+{
+  "applicationNodes": [
+    {
+      "translationPath": "assets/i18n/",
+      "behaviorURI": "my-urcap-id-app.worker.js",
+      "presenterURI": "main.js",
+      "componentTagName": "my-company-id-my-urcap-id-my-urcap-id-app"
+    }
+  ],
+  "programNodes": [
+    {
+      "excludeFromToolbox": false,
+      "translationPath": "assets/i18n/",
+      "iconURI": "assets/icons/my-urcap-id-prg.svg",
+      "behaviorURI": "my-urcap-id-prg.worker.js",
+      "presenterURI": "main.js",
+      "componentTagName": "my-company-id-my-urcap-id-my-urcap-id-prg"
+    }
+  ],
+  "smartSkills": []
+}

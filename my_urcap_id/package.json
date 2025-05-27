@@ -1,0 +1,34 @@
+{
+  "name": "my_urcap_id",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "cd my_urcap_id-frontend && npm run start",
+    "install-frontend": "cd my_urcap_id-frontend && npm install",
+    "install-backend": "cd my_urcap_id-backend && npm install",
+    "lint": "cd my_urcap_id-frontend && npm run lint",
+    "postinstall": "npm run install-frontend && npm run install-backend",
+    "prebuild": "npm run clean-dist && npm run clean-target",
+    "build-arm": "export ARCH=linux/arm64 && npm run build",
+    "build": "npm run build-backend && npm run build-frontend",
+    "postbuild": "npm run package",
+    "build-backend": "npm run build --prefix my_urcap_id-backend",
+    "build-frontend": "npm run build --prefix my_urcap_id-frontend",
+    "prepackage": "mkdir dist && npm run copy-backend && npm run copy-frontend && npm run copy-manifest && npm run copy-license && npm run write-requirements",
+    "package": "package-urcap dist target",
+    "copy-backend": "ncp 'my_urcap_id-backend/dist' dist/my_urcap_id-backend",
+    "copy-frontend": "ncp 'my_urcap_id-frontend/dist' 'dist'",
+    "copy-manifest": "ncp 'manifest.yaml' 'dist/manifest.yaml'",
+    "write-requirements": "write-ur-packages ./my_urcap_id-frontend/package.json dist/requirements.txt",
+    "copy-license": "ncp 'LICENSE' 'dist/LICENSE'",
+    "clean-dist": "rimraf dist",
+    "clean-target": "rimraf target",
+    "install-urcap": "install-urcap 'target/my_urcap_id*.urcapx'",
+    "delete-urcap": "delete-urcap my_company_id my_urcap_id"
+  },
+  "private": true,
+  "devDependencies": {
+    "@universal-robots/urcap-utils": "1.3.0",
+    "ncp": "2.0.0",
+    "rimraf": "5.0.7"
+  }
+}

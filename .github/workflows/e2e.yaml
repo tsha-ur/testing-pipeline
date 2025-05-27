@@ -8,16 +8,35 @@ on:
     branches: [ main ]
 
 jobs:
-  cypress-run:
+  build-urcap:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Set registry
+        working-directory: my_urcap_id
+        run: npm config set @universal-robots:registry https://pkgs.dev.azure.com/polyscopex/api/_packaging/polyscopex/npm/registry/; npm config set strict-ssl false
+      - name: Install npm packages
+        working-directory: my_urcap_id
+        run: npm install
+      - name: Build URCap
+        working-directory: my_urcap_id
+        run: npm run build
+      - name: Store URCap for installation step
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-urcap
+          path: my_urcap_id/target/my_urcap_id-1.0.0.urcapx
 
+  simulator:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-
+        uses: actions/checkout@v4
       - name: Set up Docker Compose
         uses: docker/setup-buildx-action@v3
-
       - name: Run Docker compose
         run: docker compose -f "docker-compose.yml" up -d --build
 
@@ -45,6 +64,32 @@ jobs:
             sleep 5
           done
 
+  install-urcap:
+    needs:
+      - build-urcap
+      - simulator
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Download URCap from build step
+        uses: actions/download-artifact@v4
+        with:
+          name: my-urcap
+          path: my_urcap_id/target
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - name: Install URCap
+        working-directory: my_urcap_id
+        run: npm run install-urcap
+
+  cypress-run:
+    needs: install-urcap
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Run Cypress tests in Docker
         run: |
           docker run --network host \

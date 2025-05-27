@@ -1,0 +1,14 @@
+metadata:
+  vendorID: "my_company_id"
+  urcapID: "my_urcap_id"
+  vendorName: "my_company_name"
+  urcapName: "my_urcap_name"
+  version: 1.0.0
+artifacts:
+  webArchives:
+  - id: "my_urcap_id-frontend"
+    folder: "my_urcap_id-frontend"
+  containers:
+  - id: "my_urcap_id-backend"
+    image: "my_urcap_id-backend:latest"
+  
