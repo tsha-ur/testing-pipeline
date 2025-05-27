@@ -8,29 +8,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-urcap:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - name: Set registry
-        working-directory: my_urcap_id
-        run: npm config set @universal-robots:registry https://pkgs.dev.azure.com/polyscopex/api/_packaging/polyscopex/npm/registry/; npm config set strict-ssl false
-      - name: Install npm packages
-        working-directory: my_urcap_id
-        run: npm install
-      - name: Build URCap
-        working-directory: my_urcap_id
-        run: npm run build
-      - name: Store URCap for installation step
-        uses: actions/upload-artifact@v4
-        with:
-          name: my-urcap
-          path: my_urcap_id/target/my_urcap_id-1.0.0.urcapx
-
-  simulator:
+  Build-install-and-test-urcap:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -39,7 +17,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Run Docker compose
         run: docker compose -f "docker-compose.yml" up -d --build
-
       - name: Wait for URService to be ready
         run: |
           echo "Waiting for service to report alive=true..."
@@ -56,47 +33,36 @@ jobs:
         run: |
           echo "Waiting for service to report alive=true..."
           for i in {1..100}; do
-            if curl -s http://localhost//universal-robots/polyscopex-services/polyscopex-services/rest-api/application/boot/progress | grep -q 'STARTED'; then
+            if curl -s http://localhost/universal-robots/polyscopex-services/polyscopex-services/rest-api/application/boot/progress | grep -q 'STARTED'; then
               echo "✅ Service is alive"
               break
             fi
             echo "Waiting... ($i/100)"
             sleep 5
           done
-
-  install-urcap:
-    needs:
-      - build-urcap
-      - simulator
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Download URCap from build step
-        uses: actions/download-artifact@v4
-        with:
-          name: my-urcap
-          path: my_urcap_id/target
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
-      - name: Install URCap
+          node-version: 20
+      - name: Configure scoped registry and npm settings
+        working-directory: my_urcap_id
+        run: |
+          npm config set @universal-robots:registry https://pkgs.dev.azure.com/polyscopex/api/_packaging/polyscopex/npm/registry/
+          npm config set strict-ssl false
+      - name: Install npm packages
+        working-directory: my_urcap_id
+        run: npm install
+      - name: Build URCap
+        working-directory: my_urcap_id
+        run: npm run build
+      - name: Install-urcap
         working-directory: my_urcap_id
         run: npm run install-urcap
-
-  cypress-run:
-    needs: install-urcap
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
       - name: Run Cypress tests in Docker
         run: |
           docker run --network host \
             -v ${{ github.workspace }}:/e2e \
             -w /e2e \
-            cypress/included:13.11.0 \
-            --config baseUrl=http://localhost
+            cypress/included:13.11.0
 
       - name: Upload Cypress screenshots
         if: failure()
