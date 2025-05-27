@@ -9,3 +9,12 @@
 **/package-lock.json
 **/node_modules
 
+# Angular related files
+**/.angular
+
+# Output folders
+**/dist/
+/my_urcap_id/target/
+
+# Generated file
+**/generated/contribution-constants.ts

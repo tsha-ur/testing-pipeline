@@ -5,8 +5,9 @@ module.exports = defineConfig({
         baseUrl: 'http://localhost',
         specPattern: 'cypress/e2e/**/*.cy.ts',
         supportFile: 'cypress/support/index.ts',
-        video: true,
-        videoCompression: 32,
-        trashAssetsBeforeRuns: true,
+        viewportHeight: 800,
+        viewportWidth: 1280,
+        waitForAnimations: true,
+        animationDistanceThreshold: 50,
     },
 });
