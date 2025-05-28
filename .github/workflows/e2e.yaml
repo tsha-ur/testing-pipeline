@@ -17,30 +17,6 @@ jobs:
         uses: docker/setup-buildx-action@v3
       - name: Run Docker compose
         run: docker compose -f "docker-compose.yml" up -d --build
-      - name: Wait for URService to be ready
-        run: |
-          echo "Waiting for service to report alive=true..."
-          for i in {1..100}; do
-            if curl -s http://localhost/universal-robots/urservice/api/v1/health | grep -q '"alive":\s*true'; then
-              echo "✅ Service is alive"
-              break
-            fi
-            echo "Waiting... ($i/100)"
-            sleep 5
-          done
-
-      - name: Wait for PolyScope X services to be ready
-        run: |
-          echo "Waiting for service to report alive=true..."
-          for i in {1..100}; do
-            if curl -s http://localhost/universal-robots/polyscopex-services/polyscopex-services/rest-api/application/boot/progress | grep -q 'STARTED'; then
-              echo "✅ Service is alive"
-              break
-            fi
-            echo "Waiting... ($i/100)"
-            sleep 5
-          done
-
       - name: Cache node modules
         id: cache-npm
         uses: actions/cache@v4
@@ -58,7 +34,6 @@ jobs:
         name: List the state of node modules
         continue-on-error: true
         run: npm list
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -73,6 +48,28 @@ jobs:
       - name: Build URCap
         working-directory: my_urcap_id
         run: npm run build
+      - name: Wait for URService to be ready
+        run: |
+          echo "Waiting for service to report alive=true..."
+          for i in {1..100}; do
+            if curl -s http://localhost/universal-robots/urservice/api/v1/health | grep -q '"alive":\s*true'; then
+              echo "✅ Service is alive"
+              break
+            fi
+            echo "Waiting... ($i/100)"
+            sleep 5
+          done
+      - name: Wait for PolyScope X services to be ready
+        run: |
+          echo "Waiting for service to report alive=true..."
+          for i in {1..100}; do
+            if curl -s http://localhost/universal-robots/polyscopex-services/polyscopex-services/rest-api/application/boot/progress | grep -q 'STARTED'; then
+              echo "✅ Service is alive"
+              break
+            fi
+            echo "Waiting... ($i/100)"
+            sleep 5
+          done
       - name: Install-urcap
         working-directory: my_urcap_id
         run: npm run install-urcap
