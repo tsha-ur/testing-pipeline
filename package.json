@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "scripts": {
     "cy:open": "cypress open",
-    "cy:run": "cypress run"
+    "cy:run": "cypress run",
+    "install-urcap": "install-urcap 'my_urcap_id*.urcapx'"
   },
   "devDependencies": {
+    "@universal-robots/urcap-utils": "1.3.0",
     "cypress": "^13.11.0",
     "typescript": "^5.8.3"
   }

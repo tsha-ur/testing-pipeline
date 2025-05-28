@@ -1,6 +1,6 @@
 services:
   ursim:
-    image: universalrobots/ursim_polyscopex:10.9.0
+    image: universalrobots/ursim_polyscopex:${VERSION}
     privileged: true
     extra_hosts:
       - "host.docker.internal:host-gateway"

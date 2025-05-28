@@ -1,0 +1,76 @@
+name: build-urcap.yaml
+on:
+  workflow_dispatch:
+  push:
+    branches: [ test ]
+
+jobs:
+  build-and-upload-artifact:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Configure scoped registry and npm settings
+        working-directory: my_urcap_id
+        run: |
+          npm config set @universal-robots:registry https://pkgs.dev.azure.com/polyscopex/api/_packaging/polyscopex/npm/registry/
+          npm config set strict-ssl false
+          npm install
+          npm run build
+
+      - name: Upload artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-urcapx-file
+          path: my_urcap_id/target/my_urcap_id-1.0.0.urcapx
+
+  matrix-test:
+    runs-on: ubuntu-latest
+    needs: build-and-upload-artifact
+    strategy:
+      matrix:
+        version: [10.5.0, 10.6.0, 10.7.0, 10.8.0, 10.9.0]
+    env:
+      VERSION: ${{ matrix.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        uses: docker/setup-buildx-action@v3
+
+      - name: Run Docker compose
+        run: docker compose -f "docker-compose.yml" up -d --build
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Configure scoped registry and npm settings
+        run: |
+          npm config set @universal-robots:registry https://pkgs.dev.azure.com/polyscopex/api/_packaging/polyscopex/npm/registry/
+          npm config set strict-ssl false
+          npm install
+
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: my-urcapx-file
+
+      - name: Wait for PolyScope X services to be ready
+        run: |
+          echo "Waiting for service to report alive=true..."
+          for i in {1..50}; do
+            if curl -s http://localhost/universal-robots/polyscopex-services/polyscopex-services/rest-api/application/boot/progress | grep -q 'STARTED'; then
+              echo "✅ Service is alive"
+              break
+            fi
+            echo "Waiting... ($i/50)"
+            sleep 5
+          done
+
+      - name: Install the URCap
+        run: npm run install-urcap
